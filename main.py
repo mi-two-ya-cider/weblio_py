@@ -7,12 +7,16 @@ import json
 import win32gui
 import subprocess
 import history_view
+import os
+import cython
+from tkinter import messagebox
+from datetime import datetime
 
 root = tk.Tk()
 stop = False
 window_title = "quick weblio search"
 
-###############################
+###################################################################
 #ぼやけるの防止
 #ソース:https://www.zacoding.com/post/wxpython-high-dpi/
 import ctypes
@@ -20,18 +24,59 @@ try:
     ctypes.windll.shcore.SetProcessDpiAwareness(True)
 except:
     pass
-###############################
+###################################################################
 
-history_json = open('history.json')
-history_list = json.load(history_json)
-print(history_list)
-print(history_list[0])
-print(history_list[0][0])
-history_wordlist = history_list[0]
-history_timelist = history_list[1]
-print(history_wordlist)
-print(history_timelist)
-history_json.close()
+with open('history.json') as history_json:
+    history_list = json.load(history_json)
+    print(history_list)
+    print(history_list[0])
+    print(history_list[0][0])
+    history_wordlist = history_list[0]
+    history_timelist = history_list[1]
+    print(history_wordlist)
+    print(history_timelist)
+
+def updtfile(word, time):
+#    try:
+        with open('history.json') as hist_mat:
+            print("word:"+str(word))
+            print('time:'+str(time))
+            hist_list = json.load(hist_mat)
+            hist_word = []
+            hist_time = []
+            hist_word = hist_list[0]
+            hist_time = hist_list[1]
+            hist_word.append(word)
+            hist_time.append(time)
+            print(hist_mat)
+            print(hist_word)
+#            try:
+            #os.remove("history.json")
+#            except:
+#                messagebox.showwarning('file error', "history.json file was not found\nIf you want to fix it, you can search the file by yourself or creat new history.json file")
+#                raise ValueError('history.json was not found')
+#        with open('history.json', 'w') as file:
+            all_list = []
+            all_list.append(hist_word)
+            all_list.append(hist_time)
+            print(all_list)
+            #print(list(str(list(all_list)[1:][:-1])))
+            json.dump(all_list, open('history.json', 'w'))
+#    except:
+#        print('error')
+
+
+def gettime():
+    dt = datetime.now()
+    year = dt.year
+    month = dt.month
+    day = dt.day
+    hour = dt.hour
+    minute = dt.minute
+    second = dt.second
+    dt_list = [year, month, day, day, hour, minute, second]
+    print(dt_list)
+    return dt_list
 
 history_wordlist_show = list(reversed(history_wordlist))
 history_timelist_show = list(reversed(history_timelist))
@@ -78,9 +123,10 @@ wordbox.focus_set()
 
 def openweblio(throw_away=None):
     word = wordbox.get()
+    updtfile(word, list(gettime()))
     if word == '':
         print('blank value')
-        tk.messagebox.showwarning('search value error', "Cannot search for blank values")
+        messagebox.showwarning('search value error', "Cannot search for blank values")
     else:
         webbrowser.open('https://ejje.weblio.jp/content/'+str(word))
 #    sleep(3)
